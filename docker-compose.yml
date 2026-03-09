@@ -1,0 +1,41 @@
+services:
+  rarecare:
+    build:
+      context: .
+      dockerfile: ./docker/php/dockerfile
+    container_name: rarecare_container
+    volumes:
+      - ./:/var/www/html
+    environment:
+      - POSTGRES_USER=${USER}
+      - POSTGRES_DB=${DATABASE}
+      - POSTGRES_PASSWORD=${PASSWORD}
+      - POSTGRES_PORT=${PORT}
+      - DATABASE_URL=postgresql://${USER}:${PASSWORD}@persona-db:5432/${DATABASE}?serverVersion=16&charset=utf8
+    depends_on:
+      - rarecare_db
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_container
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - rarecare
+
+  rarecare_db:
+    image: postgres:16
+    container_name: rarecare_db_container
+    environment:
+      - POSTGRES_USER=${USER}
+      - POSTGRES_DB=${DATABASE}
+      - POSTGRES_PASSWORD=${PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - rarecare_data:/var/lib/postgresql/data
+
+volumes:
+  rarecare_data:

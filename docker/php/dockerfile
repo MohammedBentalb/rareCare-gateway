@@ -1,0 +1,29 @@
+FROM php:8.4-fpm
+
+# Install system dependencies and PHP extensions
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+
+RUN install-php-extensions \
+    gd \
+    intl \
+    zip \
+    opcache \
+    pdo_pgsql \
+    ctype \
+    iconv
+
+WORKDIR /var/www/html
+
+COPY composer.json composer.lock ./
+
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+RUN composer install --working-dir=/var/www/html --no-dev --no-scripts --optimize-autoloader
+
+COPY ./ ./
+
+RUN composer dump-autoload --working-dir=/var/www/html --optimize --no-dev --classmap-authoritative
+
+EXPOSE 9000
