@@ -9,7 +9,7 @@ class RegisterDTO {
 
     #[Assert\NotBlank]
     #[Assert\Length(min: 3)]
-    public string $username;
+    public string $name;
 
     #[Assert\NotBlank]
     #[Assert\Email]

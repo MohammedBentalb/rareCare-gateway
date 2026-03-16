@@ -12,7 +12,7 @@ class AuthService {
     public function register(RegisterDTO $dto): User {
         $user = new User();
         $user->setEmail($dto->email);
-        $user->setUsername($dto->username);
+        $user->setName($dto->name);
         
         $hashedPassword = $this->passwordHasher->hashPassword($user, $dto->password);
         $user->setPassword($hashedPassword);

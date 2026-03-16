@@ -11,6 +11,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
+use OpenApi\Attributes as OA;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`users`')]
@@ -21,12 +22,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\GeneratedValue(strategy: "CUSTOM")]
     #[ORM\CustomIdGenerator(class: "doctrine.uuid_generator")]
     #[ORM\Column(type: 'uuid', unique: true)]
+    #[OA\Property(type: 'string', format: 'uuid')]
     private ?Uuid $id = null;
 
     #[ORM\Column(length: 180)]
+    #[OA\Property(description: 'Email address')]
     private ?string $email = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[OA\Property(description: 'Full name')]
     private ?string $name = null;
 
     /**
