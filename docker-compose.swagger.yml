@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: rarecare_swagger
+    ports:
+      - "8002:8080"
+    volumes:
+      - ./swagger:/swagger
+    environment:
+      SWAGGER_JSON: /swagger/swagger.yaml
+    restart: unless-stopped
