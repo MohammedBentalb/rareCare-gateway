@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\DTO\RegisterDTO;
+use App\Message\UserRegisteredEvent;
 use App\Repository\UserRepository;
 use App\Security\CookieManager;
 use App\Security\TokenManager;
@@ -13,10 +14,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class AuthController extends AbstractController {
-    public function __construct(private AuthService $authService, private TokenManager $tokenManager, private CookieManager $cookieManager, private UserRepository $userRepository) {}
+    public function __construct(private AuthService $authService, private TokenManager $tokenManager, private CookieManager $cookieManager, private UserRepository $userRepository, private MessageBusInterface $bus) {}
 
     #[Route('/api/v1/login', name: 'api_login', methods: ['POST'])]
     public function index(): JsonResponse {
@@ -28,6 +31,10 @@ final class AuthController extends AbstractController {
         $user = $this->authService->register($registerDTO);
         $accessToken = $this->tokenManager->createAccessToken($user);
         $refreshCookie = $this->cookieManager->createRefreshTokenCookie($this->tokenManager->createRefreshToken($user)); 
+        $this->bus->dispatch( 
+            new UserRegisteredEvent($user->getId(), $user->getEmail(), $user->getName(), 'auth.user.registered'),
+            [new AmqpStamp('auth.user.registered')]
+        );
         $response =  $this->json(['message' => 'User registered successfully', 'user' => $user, 'token' => $accessToken], Response::HTTP_CREATED);
         $response->headers->setCookie($refreshCookie);
         return $response;
