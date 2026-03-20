@@ -16,8 +16,7 @@ RUN apt-get update && apt-get install -y \
         pdo_pgsql \
         ctype \
         iconv \
-    && pecl install amqp \
-    && docker-php-ext-enable amqp
+        amqp
 
 WORKDIR /var/www/html
 
